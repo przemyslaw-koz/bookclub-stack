@@ -1,0 +1,53 @@
+version: 3.9
+
+networks:
+  web:
+    external: true
+  internal:
+    external: true
+
+volumes:
+  bookwyrm_redis: {}
+  bookwyrm_media: {}
+  bookwyrm_static: {}
+
+services:
+  bookwyrm_redis:
+    image: redis:7
+    command: ["redis-server", "--appendonly", "yes"]
+    networks: [internal]
+    restart: unless-stopped
+
+  bookwyrm_web:
+    image: bookwyrm/bookwyrm:latest
+    depends_on:
+      - bookwyrm_redis
+      - pg_bookclub
+    environment:
+      DOMAIN: ${BOOKWYRM_DOMAIN}
+      EMAIL: ${LE_EMAIL}
+      SECRET_KEY: ${BOOKWYRM_SECRET}
+      DATABASE_URL: postgres://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      REDIS_BROKER_URL: redis://bookwyrm_redis:6379/0
+      REDIS_ACTIVITY_URL: redis://bookwyrm_redis:6379/1
+      EMAIL_HOST: smtp-relay.brevo.com
+      EMAIL_PORT: 587
+      EMAIL_HOST_USER: ${BREVO_SMTP_USER}
+      EMAIL_HOST_PASSWORD: ${BREVO_SMTP_PASS}
+      EMAIL_USE_TLS: "true"
+      MEDIA_ROOT: /app/media
+      STATIC_ROOT: /app/static
+      DEBUG: "false"
+      ALLOW_REGISTRATION: "false"
+      USE_S3: "false"
+    volumes:
+      - bookwyrm_media:/app/media
+      - bookwyrm_static:/app/static
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bookwyrm.rule=Host(`${BOOKWYRM_DOMAIN}`)
+      - traefik.http.routers.bookwyrm.entrypoints=websecure
+      - traefik.http.routers.bookwyrm.tls.certresolver=le
+      - traefik.http.services.bookwyrm.loadbalancer.server.port=8000
+    networks: [web, internal]
+    restart: unless-stopped

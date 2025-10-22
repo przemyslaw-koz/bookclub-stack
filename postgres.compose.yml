@@ -1,0 +1,26 @@
+version: "3.9"
+
+networks:
+  internal:
+    external: true
+
+volumes:
+  bookclub_pg_data: {}
+
+services:
+  pg_bookclub:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${PG_SUPER_PASS}
+    volumes:
+      - bookclub_pg_data:/var/lib/postgresql/data
+      - ./init/01-init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
+    networks: [internal]
+
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks: [internal]
