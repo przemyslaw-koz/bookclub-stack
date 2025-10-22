@@ -23,6 +23,8 @@ services:
     depends_on:
       - bookwyrm_redis
       - pg_bookclub
+    ports:
+      - "8000:8000"
     environment:
       DOMAIN: ${BOOKWYRM_DOMAIN}
       EMAIL: ${LE_EMAIL}

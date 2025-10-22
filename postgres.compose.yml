@@ -13,6 +13,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${PG_SUPER_PASS}
+      BOOKWYRM_DB_PASSWORD: ${BOOKWYRM_DB_PASSWORD}
+      DISCOURSE_DB_PASSWORD: ${DISCOURSE_DB_PASSWORD}
     volumes:
       - bookclub_pg_data:/var/lib/postgresql/data
       - ./init/01-init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
