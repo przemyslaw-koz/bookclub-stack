@@ -1,5 +1,3 @@
-version: "3.9"
-
 networks:
   web:
     external: true
@@ -15,14 +13,20 @@ services:
   bookwyrm_redis:
     image: redis:7
     command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - bookwyrm_redis:/data
     networks: [internal]
     restart: unless-stopped
 
   bookwyrm_web:
-    image: ghcr.io/bookwyrm-social/bookwyrm:latest
+    build:
+      context: https://github.com/bookwyrm-social/bookwyrm.git#v0.8.0
+      dockerfile: Dockerfile
     depends_on:
-      - bookwyrm_redis
-      - pg_bookclub
+      bookwyrm_redis:
+        condition: service_started
+      pg_bookclub:
+        condition: service_started
     ports:
       - "8000:8000"
     environment:
@@ -53,3 +57,64 @@ services:
       - traefik.http.services.bookwyrm.loadbalancer.server.port=8000
     networks: [web, internal]
     restart: unless-stopped
+
+  bookwyrm_worker:
+    build:
+      context: https://github.com/bookwyrm-social/bookwyrm.git#v0.8.0
+      dockerfile: Dockerfile
+    command: celery -A celerywyrm worker -l INFO
+    depends_on:
+      bookwyrm_redis:
+        condition: service_started
+      pg_bookclub:
+        condition: service_started
+    environment:
+      DOMAIN: ${BOOKWYRM_DOMAIN}
+      EMAIL: ${LE_EMAIL}
+      SECRET_KEY: ${BOOKWYRM_SECRET}
+      DATABASE_URL: postgres://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      REDIS_BROKER_URL: redis://bookwyrm_redis:6379/0
+      REDIS_ACTIVITY_URL: redis://bookwyrm_redis:6379/1
+      EMAIL_HOST: smtp-relay.brevo.com
+      EMAIL_PORT: 587
+      EMAIL_HOST_USER: ${BREVO_SMTP_USER}
+      EMAIL_HOST_PASSWORD: ${BREVO_SMTP_PASS}
+      EMAIL_USE_TLS: "true"
+      MEDIA_ROOT: /app/media
+      STATIC_ROOT: /app/static
+      DEBUG: "false"
+      ALLOW_REGISTRATION: "false"
+      USE_S3: "false"
+    networks: [internal]
+    restart: unless-stopped
+
+  bookwyrm_beat:
+    build:
+      context: https://github.com/bookwyrm-social/bookwyrm.git#v0.8.0
+      dockerfile: Dockerfile
+    command: celery -A celerywyrm beat -l INFO
+    depends_on:
+      bookwyrm_redis:
+        condition: service_started
+      pg_bookclub:
+        condition: service_started
+    environment:
+      DOMAIN: ${BOOKWYRM_DOMAIN}
+      EMAIL: ${LE_EMAIL}
+      SECRET_KEY: ${BOOKWYRM_SECRET}
+      DATABASE_URL: postgres://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      REDIS_BROKER_URL: redis://bookwyrm_redis:6379/0
+      REDIS_ACTIVITY_URL: redis://bookwyrm_redis:6379/1
+      EMAIL_HOST: smtp-relay.brevo.com
+      EMAIL_PORT: 587
+      EMAIL_HOST_USER: ${BREVO_SMTP_USER}
+      EMAIL_HOST_PASSWORD: ${BREVO_SMTP_PASS}
+      EMAIL_USE_TLS: "true"
+      MEDIA_ROOT: /app/media
+      STATIC_ROOT: /app/static
+      DEBUG: "false"
+      ALLOW_REGISTRATION: "false"
+      USE_S3: "false"
+    networks: [internal]
+    restart: unless-stopped
+
