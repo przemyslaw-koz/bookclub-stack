@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
 
   bookwyrm_web:
-    image: bookwyrm/bookwyrm:latest
+    image: ghcr.io/bookwyrm-social/bookwyrm:latest
     depends_on:
       - bookwyrm_redis
       - pg_bookclub
