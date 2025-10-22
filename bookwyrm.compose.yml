@@ -23,9 +23,9 @@ services:
       context: https://github.com/bookwyrm-social/bookwyrm.git#v0.8.0
       dockerfile: Dockerfile
     depends_on:
-      bookwyrm_redis:
-        condition: service_started
       pg_bookclub:
+        condition: service_started
+      bookwyrm_redis:
         condition: service_started
     ports:
       - "8000:8000"
@@ -44,17 +44,15 @@ services:
       MEDIA_ROOT: /app/media
       STATIC_ROOT: /app/static
       DEBUG: "false"
-      ALLOW_REGISTRATION: "false"
-      USE_S3: "false"
+    command: >
+      bash -lc "
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        gunicorn -c gunicorn.conf.py bookwyrm.wsgi:application
+      "
     volumes:
       - bookwyrm_media:/app/media
       - bookwyrm_static:/app/static
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.bookwyrm.rule=Host(`${BOOKWYRM_DOMAIN}`)
-      - traefik.http.routers.bookwyrm.entrypoints=websecure
-      - traefik.http.routers.bookwyrm.tls.certresolver=le
-      - traefik.http.services.bookwyrm.loadbalancer.server.port=8000
     networks: [web, internal]
     restart: unless-stopped
 
