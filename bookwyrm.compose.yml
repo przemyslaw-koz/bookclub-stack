@@ -20,8 +20,8 @@ services:
 
   bookwyrm_web:
     build:
-      context: https://github.com/bookwyrm-social/bookwyrm.git#v0.8.0
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.bookwyrm
     depends_on:
       pg_bookclub:
         condition: service_started
@@ -58,8 +58,8 @@ services:
 
   bookwyrm_worker:
     build:
-      context: https://github.com/bookwyrm-social/bookwyrm.git#v0.8.0
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.bookwyrm
     command: celery -A celerywyrm worker -l INFO
     depends_on:
       bookwyrm_redis:
@@ -88,8 +88,8 @@ services:
 
   bookwyrm_beat:
     build:
-      context: https://github.com/bookwyrm-social/bookwyrm.git#v0.8.0
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.bookwyrm
     command: celery -A celerywyrm beat -l INFO
     depends_on:
       bookwyrm_redis:
