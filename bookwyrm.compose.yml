@@ -48,7 +48,7 @@ services:
       bash -lc "
         python manage.py migrate &&
         python manage.py collectstatic --noinput &&
-        gunicorn -c gunicorn.conf.py bookwyrm.wsgi:application
+        gunicorn -b 0.0.0.0:8000 --workers 4 bookwyrm.wsgi:application
       "
     volumes:
       - bookwyrm_media:/app/media
