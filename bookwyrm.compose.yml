@@ -26,14 +26,19 @@ services:
       pg_bookclub:
         condition: service_started
       bookwyrm_redis:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "8000:8000"
     environment:
       DOMAIN: ${BOOKWYRM_DOMAIN}
       EMAIL: ${LE_EMAIL}
       SECRET_KEY: ${BOOKWYRM_SECRET}
-      DATABASE_URL: postgres://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      DATABASE_URL: postgresql://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      DB_NAME: bookwyrm
+      DB_USER: bookwyrm
+      DB_PASSWORD: ${BOOKWYRM_DB_PASSWORD}
+      DB_HOST: pg_bookclub
+      DB_PORT: 5432
       REDIS_BROKER_URL: redis://bookwyrm_redis:6379/0
       REDIS_ACTIVITY_URL: redis://bookwyrm_redis:6379/1
       EMAIL_HOST: smtp-relay.brevo.com
@@ -65,12 +70,17 @@ services:
       bookwyrm_redis:
         condition: service_started
       pg_bookclub:
-        condition: service_started
+        condition: service_healthy
     environment:
       DOMAIN: ${BOOKWYRM_DOMAIN}
       EMAIL: ${LE_EMAIL}
       SECRET_KEY: ${BOOKWYRM_SECRET}
-      DATABASE_URL: postgres://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      DATABASE_URL: postgresql://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      DB_NAME: bookwyrm
+      DB_USER: bookwyrm
+      DB_PASSWORD: ${BOOKWYRM_DB_PASSWORD}
+      DB_HOST: pg_bookclub
+      DB_PORT: 5432
       REDIS_BROKER_URL: redis://bookwyrm_redis:6379/0
       REDIS_ACTIVITY_URL: redis://bookwyrm_redis:6379/1
       EMAIL_HOST: smtp-relay.brevo.com
@@ -95,12 +105,17 @@ services:
       bookwyrm_redis:
         condition: service_started
       pg_bookclub:
-        condition: service_started
+        condition: service_healthy
     environment:
       DOMAIN: ${BOOKWYRM_DOMAIN}
       EMAIL: ${LE_EMAIL}
       SECRET_KEY: ${BOOKWYRM_SECRET}
-      DATABASE_URL: postgres://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      DATABASE_URL: postgresql://bookwyrm:${BOOKWYRM_DB_PASSWORD}@pg_bookclub:5432/bookwyrm
+      DB_NAME: bookwyrm
+      DB_USER: bookwyrm
+      DB_PASSWORD: ${BOOKWYRM_DB_PASSWORD}
+      DB_HOST: pg_bookclub
+      DB_PORT: 5432
       REDIS_BROKER_URL: redis://bookwyrm_redis:6379/0
       REDIS_ACTIVITY_URL: redis://bookwyrm_redis:6379/1
       EMAIL_HOST: smtp-relay.brevo.com
